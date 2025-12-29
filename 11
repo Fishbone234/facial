@@ -1,0 +1,282 @@
+import time
+import random
+import math
+
+class FaceRecognitionSimulator:
+    def __init__(self):
+        # 用户数据库
+        self.users = {
+            "张三": {
+                "features": self._generate_features("张三"),
+                "description": "方脸，戴眼镜，短发"
+            },
+            "李四": {
+                "features": self._generate_features("李四"),
+                "description": "圆脸，有胡子，平头"
+            },
+            "王五": {
+                "features": self._generate_features("王五"),
+                "description": "长脸，有酒窝，分头"
+            },
+            "赵六": {
+                "features": self._generate_features("赵六"),
+                "description": "椭圆脸，戴耳环，卷发"
+            }
+        }
+        self.threshold = 0.75  # 识别阈值
+        
+    def _generate_features(self, seed_str):
+        """根据名字生成唯一的特征向量"""
+        # 使用名字的哈希值作为随机种子
+        random.seed(hash(seed_str))
+        features = []
+        for _ in range(10):  # 10维特征向量
+            features.append(random.random())
+        return features
+    
+    def _cosine_similarity(self, vec1, vec2):
+        """计算余弦相似度"""
+        dot_product = sum(a * b for a, b in zip(vec1, vec2))
+        norm1 = math.sqrt(sum(a * a for a in vec1))
+        norm2 = math.sqrt(sum(b * b for b in vec2))
+        
+        if norm1 == 0 or norm2 == 0:
+            return 0
+        return dot_product / (norm1 * norm2)
+    
+    def _animate_text(self, text, delay=0.05):
+        """打字机效果显示文本"""
+        for char in text:
+            print(char, end='', flush=True)
+            time.sleep(delay)
+        print()
+    
+    def _print_box(self, title, content):
+        """打印带边框的文本"""
+        width = max(len(title), max(len(line) for line in content.split('\n'))) + 4
+        print("╔" + "═" * (width - 2) + "╗")
+        print("║ " + title.center(width - 3) + "║")
+        print("╠" + "═" * (width - 2) + "╣")
+        for line in content.split('\n'):
+            print("║ " + line.ljust(width - 3) + "║")
+        print("╚" + "═" * (width - 2) + "╝")
+    
+    def detect_face(self):
+        """模拟人脸检测"""
+        self._animate_text("[系统] 启动摄像头...")
+        time.sleep(0.8)
+        
+        # 随机选择一个用户或陌生人
+        all_choices = list(self.users.keys()) + ["陌生人"]
+        target = random.choice(all_choices)
+        
+        if target == "陌生人":
+            self._animate_text("[摄像头] 检测到未注册人员")
+            description = "未知面孔，不在数据库中"
+        else:
+            self._animate_text(f"[摄像头] 检测到人脸")
+            description = self.users[target]["description"]
+            
+        self._animate_text(f"[系统] 人物描述: {description}")
+        return target
+    
+    def extract_features(self, target):
+        """模拟特征提取"""
+        self._animate_text("\n[系统] 开始特征提取...")
+        time.sleep(0.5)
+        
+        # 模拟关键点检测
+        keypoints = ["左眼", "右眼", "鼻尖", "左嘴角", "右嘴角"]
+        self._animate_text(f"[算法] 定位面部关键点: {', '.join(keypoints)}")
+        time.sleep(0.5)
+        
+        # 生成特征向量
+        if target in self.users:
+            base_features = self.users[target]["features"]
+            # 添加少量噪声模拟真实情况
+            features = [f + random.uniform(-0.1, 0.1) for f in base_features]
+        else:
+            features = [random.random() for _ in range(10)]
+            
+        self._animate_text(f"[算法] 生成特征向量: [{features[0]:.2f}, {features[1]:.2f}, ...]")
+        return features
+    
+    def match_in_database(self, features):
+        """在数据库中匹配"""
+        self._animate_text("\n[系统] 正在数据库中进行匹配...")
+        time.sleep(0.7)
+        
+        best_match = None
+        best_score = 0
+        
+        print("\n[系统] 比对结果:")
+        for name, user_data in self.users.items():
+            similarity = self._cosine_similarity(features, user_data["features"])
+            similarity = round(similarity, 3)
+            
+            # 可视化相似度条
+            bar_length = 20
+            filled = int(similarity * bar_length)
+            bar = "█" * filled + "░" * (bar_length - filled)
+            
+            print(f"  {name:<4} ▏{bar}▏ {similarity*100:5.1f}%")
+            
+            if similarity > best_score:
+                best_score = similarity
+                best_match = name
+                
+            time.sleep(0.2)
+            
+        return best_match, best_score
+    
+    def liveness_detection(self):
+        """模拟活体检测"""
+        self._animate_text("\n[系统] 开始活体检测...")
+        time.sleep(0.5)
+        
+        tests = [
+            ("红外检测", 0.95),
+            ("3D深度检测", 0.90),
+            ("眨眼检测", 0.85),
+            ("唇动检测", 0.88)
+        ]
+        
+        all_passed = True
+        for test_name, success_rate in tests:
+            passed = random.random() < success_rate
+            status = "✓ 通过" if passed else "✗ 失败"
+            print(f"  {test_name:12} -> {status}")
+            
+            if not passed:
+                all_passed = False
+                print(f"    [警告] 检测到异常: 可能是照片或视频攻击")
+                
+            time.sleep(0.3)
+            
+        return all_passed
+    
+    def simulate_recognition(self):
+        """运行一次完整的人脸识别模拟"""
+        print("\n" + "="*60)
+        print("人脸识别系统模拟".center(60))
+        print("="*60)
+        
+        # 1. 人脸检测
+        target = self.detect_face()
+        
+        # 2. 特征提取
+        features = self.extract_features(target)
+        
+        # 3. 数据库匹配
+        matched_name, score = self.match_in_database(features)
+        
+        # 4. 活体检测
+        is_live = self.liveness_detection()
+        
+        # 5. 显示最终结果
+        print("\n" + "="*60)
+        print("识别结果".center(60))
+        print("="*60)
+        
+        if not is_live:
+            result = "❌ 验证失败"
+            reason = "活体检测未通过"
+        elif matched_name and score >= self.threshold:
+            result = "✅ 识别成功"
+            reason = f"匹配用户: {matched_name}"
+        else:
+            result = "❓ 未知人员"
+            reason = "未在数据库中找到匹配"
+        
+        # 创建结果报告
+        report = f"""
+        识别状态: {result}
+        置信度: {score*100:.1f}%
+        阈值要求: {self.threshold*100:.1f}%
+        活体检测: {'通过' if is_live else '失败'}
+        详细原因: {reason}
+        
+        """
+        
+        # 模拟应用场景
+        if result == "✅ 识别成功":
+            scenarios = [
+                "📱 手机解锁成功",
+                "🚪 门禁系统开启",
+                "💰 支付验证通过",
+                "🕒 考勤打卡成功"
+            ]
+            scenario = random.choice(scenarios)
+            report += f"        应用场景: {scenario}"
+        
+        self._print_box("人脸识别报告", report.strip())
+        
+        # 返回结果供统计
+        return {
+            "target": target,
+            "matched": matched_name,
+            "score": score,
+            "success": result == "✅ 识别成功",
+            "is_live": is_live
+        }
+
+def main():
+    """主程序"""
+    print("初始化人脸识别系统...")
+    time.sleep(1)
+    
+    # 创建模拟器
+    simulator = FaceRecognitionSimulator()
+    
+    # 显示系统信息
+    print("\n" + "▄" * 60)
+    print("系统信息".center(60))
+    print("▀" * 60)
+    print(f"• 注册用户数: {len(simulator.users)}")
+    print(f"• 识别阈值: {simulator.threshold*100}%")
+    print(f"• 特征维度: 10维向量")
+    print(f"• 活体检测: 启用")
+    print("-" * 60)
+    
+    # 运行多次模拟
+    results = []
+    num_simulations = 5
+    
+    input("\n按 Enter 键开始模拟人脸识别...")
+    
+    for i in range(num_simulations):
+        print(f"\n\n第 {i+1} 次识别尝试".center(60, "✦"))
+        result = simulator.simulate_recognition()
+        results.append(result)
+        
+        if i < num_simulations - 1:
+            input("\n按 Enter 键继续下一次识别...")
+    
+    # 显示统计信息
+    print("\n" + "="*60)
+    print("识别统计".center(60))
+    print("="*60)
+    
+    total = len(results)
+    success_count = sum(1 for r in results if r["success"])
+    live_count = sum(1 for r in results if r["is_live"])
+    
+    stats = f"""
+    总识别次数: {total}
+    成功识别: {success_count} ({success_count/total*100:.1f}%)
+    活体通过: {live_count} ({live_count/total*100:.1f}%)
+    平均置信度: {sum(r['score'] for r in results)/total*100:.1f}%
+    
+    详细记录:
+    """
+    
+    for i, r in enumerate(results, 1):
+        status = "成功" if r["success"] else "失败"
+        stats += f"    {i}. {r['target']} -> {r['matched'] or '无'} ({status})\n"
+    
+    print(stats)
+    print("="*60)
+    print("\n模拟结束，感谢使用人脸识别系统！")
+
+if __name__ == "__main__":
+    main()
